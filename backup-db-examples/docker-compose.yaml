@@ -1,0 +1,83 @@
+version: '3.5'
+
+services:
+  db:
+    container_name: alpha-db
+    image: devopseasylearning/apha-db:latest
+    environment:
+      environment:
+      MYSQL_ROOT_PASSWORD: BoQU2SSK*PJqYYS8L*w8rDn # This use root as username
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: GzWNQY8eH4YBkt8HutZj@*J
+      MYSQL_DATABASE: weatherapp
+    volumes:
+      - /data/db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - alpha
+    restart: always
+
+  redis:
+    container_name: alpha-redis
+    image: devopseasylearning/apha-redis:latest
+    networks:
+      - alpha
+    environment:
+      REDIS_USER: redis
+      REDIS_PASSWORD: fR*f#V2nBeuVh4#b^F92tat4
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis-data:/data
+    restart: always
+
+  weather:
+    container_name: alpha-weather
+    image: devopseasylearning/apha-weather:latest
+    ports:
+      - 5000:5000
+    environment:
+      APIKEY: ecbc396f46mshb65cbb1f82cf334p1fcc87jsna5e962a3c542
+    networks:
+      - alpha
+    restart: always
+    depends_on:
+      - db
+      - redis # Weather depends on both db and redis
+
+  auth:
+    container_name: alpha-auth
+    image: devopseasylearning/apha-auth:latest
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: BoQU2SSK*PJqYYS8L*w8rDn
+    ports:
+      - 8080:8080
+    networks:
+      - alpha
+    restart: always
+    depends_on:
+      - weather # Auth depends on the weather service
+
+  ui:
+    container_name: alpha-ui
+    image: devopseasylearning/apha-ui:latest
+    environment:
+      AUTH_HOST: auth
+      AUTH_PORT: 8080
+      WEATHER_HOST: weather
+      WEATHER_PORT: 5000
+      REDIS_USER: redis
+      REDIS_PASSWORD: fR*f#V2nBeuVh4#b^F92tat4
+    ports:
+      - 3000:3000
+    networks:
+      - alpha
+    restart: always
+    depends_on:
+      - auth # UI depends on Auth
+
+networks:
+  alpha:
+    driver: bridge

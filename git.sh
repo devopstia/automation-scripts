@@ -7,7 +7,7 @@ cd ~/code
 for i in $(ls); do
     if [ -d "$i/.git" ]; then
         # If it's a git repository, enter the directory and update, add, commit, and push changes
-        sleep 2
+        sleep 1
         echo
         echo
         echo "========================================================================="
